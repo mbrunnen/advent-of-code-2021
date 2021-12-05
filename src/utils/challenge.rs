@@ -3,7 +3,7 @@ use std::io::{prelude::*, BufReader};
 
 pub trait Challenge {
     fn new(input_file: &str) -> Self;
-    fn run(&self) -> Result<String, String>;
+    fn run(&self, part: u32) -> Result<String, String>;
     fn load(input_file: &str) -> Result<Vec<String>, String> {
         match File::open(input_file) {
             Ok(file) => {

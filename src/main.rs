@@ -32,7 +32,7 @@ fn main() {
                 .multiple(false),
         )
         .arg(
-            Arg::with_name("--part")
+            Arg::with_name("part")
                 .short("-p")
                 .help("Set the part")
                 .default_value("1")
@@ -52,6 +52,11 @@ fn main() {
         process::exit(1);
     });
 
+    let part: u32 = parse_arg(matches.value_of("part")).unwrap_or_else(|err| {
+        eprintln!("Problem converting part: {:?}", err);
+        process::exit(1);
+    });
+
     let input_file: String = matches
         .values_of("INPUT")
         .unwrap()
@@ -61,7 +66,7 @@ fn main() {
     let result = match day {
         1 => {
             let challenge = day1::Day1::new(&input_file);
-            challenge.run()
+            challenge.run(part)
         }
         x => unimplemented!("Invalid day: {}", x),
     }
@@ -70,5 +75,5 @@ fn main() {
         process::exit(1);
     });
 
-    println!("The result for day {}:\t\n{}", day, result);
+    println!("The result for day {}, part {}: {}", day, part, result);
 }

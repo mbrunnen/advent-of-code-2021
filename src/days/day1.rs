@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 pub struct Day1 {
     data: Vec<u32>,
 }
+
 impl Challenge for Day1 {
     fn new(input_file: &str) -> Self {
         let lines: Vec<String> = Self::load(input_file).unwrap();
@@ -16,7 +17,20 @@ impl Challenge for Day1 {
         }
     }
 
-    fn run(&self) -> Result<String, String> {
+    fn run(&self, part: u32) -> Result<String, String> {
+        match part {
+            1 => self.run_part_one(),
+            x => unimplemented!(
+                "Invalid part {} for Day {}",
+                x,
+                std::any::type_name::<Self>()
+            ),
+        }
+    }
+}
+
+impl Day1 {
+    fn run_part_one(&self) -> Result<String, String> {
         let mut last: Option<u32> = None;
 
         let increased = self.data.iter().fold(0, |mut acc, item| {

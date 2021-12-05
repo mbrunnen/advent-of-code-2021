@@ -16,6 +16,32 @@ impl Challenge for Day1 {
     }
 
     fn run(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", self.data))
+        let mut last: Option<u32> = None;
+
+        let increased = self.data.iter().fold(0, |mut acc, item| {
+            acc = match last {
+                Some(x) => {
+                    if item > &x {
+                        print!("{} (increased)", item);
+                        acc + 1
+                    } else if item < &x {
+                        print!("{} (decreased)", item);
+                        acc
+                    } else {
+                        print!("{} (no change)", item);
+                        acc
+                    }
+                }
+                None => {
+                    print!("{} (N/A - previous measurement)", item);
+                    0
+                }
+            };
+            last = Some(*item);
+            println!(" - {}", acc);
+            acc
+        });
+
+        Ok(format!("{:#?}", increased))
     }
 }

@@ -144,3 +144,122 @@ impl Day2 {
         Ok(format!("{:#?}", end_position.pos.x * end_position.pos.y))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_str() {
+        let input = &[
+            "forward 5",
+            "down 5",
+            "forward 8",
+            "up 3",
+            "down 8",
+            "forward 2",
+        ];
+
+        let expected: Vec<SubmarineState> = vec![
+            SubmarineState {
+                pos: Point { x: 0, y: 0 },
+                vel: 5,
+                aim: 0,
+            },
+            SubmarineState {
+                pos: Point { x: 0, y: 0 },
+                vel: 0,
+                aim: 5,
+            },
+            SubmarineState {
+                pos: Point { x: 0, y: 0 },
+                vel: 8,
+                aim: 0,
+            },
+            SubmarineState {
+                pos: Point { x: 0, y: 0 },
+                vel: 0,
+                aim: -3,
+            },
+            SubmarineState {
+                pos: Point { x: 0, y: 0 },
+                vel: 0,
+                aim: 8,
+            },
+            SubmarineState {
+                pos: Point { x: 0, y: 0 },
+                vel: 2,
+                aim: 0,
+            },
+        ];
+
+        for (pos, l) in input.iter().enumerate() {
+            let ss = SubmarineState::from_str(l).unwrap();
+            assert_eq!(ss, expected[pos]);
+        }
+    }
+
+    #[test]
+    fn test_new() {
+        let expected = SubmarineState {
+            pos: Point { x: 0, y: 0 },
+            vel: 1,
+            aim: -3,
+        };
+        assert_eq!(SubmarineState::new(1, -3), expected);
+    }
+
+    #[test]
+    fn test_add() {
+        let input = &[
+            "forward 5",
+            "down 5",
+            "forward 8",
+            "up 3",
+            "down 8",
+            "forward 2",
+        ];
+
+        let expected: Vec<SubmarineState> = vec![
+            SubmarineState {
+                pos: Point { x: 5, y: 0 },
+                vel: 5,
+                aim: 0,
+            },
+            SubmarineState {
+                pos: Point { x: 5, y: 0 },
+                vel: 0,
+                aim: 5,
+            },
+            SubmarineState {
+                pos: Point { x: 13, y: 40 },
+                vel: 8,
+                aim: 5,
+            },
+            SubmarineState {
+                pos: Point { x: 13, y: 40 },
+                vel: 0,
+                aim: 2,
+            },
+            SubmarineState {
+                pos: Point { x: 13, y: 40 },
+                vel: 0,
+                aim: 10,
+            },
+            SubmarineState {
+                pos: Point { x: 15, y: 60 },
+                vel: 2,
+                aim: 10,
+            },
+        ];
+
+        let mut ss = SubmarineState::new(0, 0);
+
+        for (pos, l) in input.iter().enumerate() {
+            let act = SubmarineState::from_str(l).unwrap();
+            ss = ss + act;
+
+            assert_eq!(ss, expected[pos]);
+        }
+    }
+}

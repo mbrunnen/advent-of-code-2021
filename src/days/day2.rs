@@ -9,12 +9,12 @@ pub struct Day2 {
 }
 
 #[derive(Debug, PartialEq)]
-struct Position {
+struct Point {
     x: i32,
     y: i32,
 }
 
-impl FromStr for Position {
+impl FromStr for Point {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -37,11 +37,11 @@ impl FromStr for Position {
     }
 }
 
-impl Add for Position {
-    type Output = Position;
+impl Add for Point {
+    type Output = Self;
 
-    fn add(self, other: Position) -> Position {
-        Position {
+    fn add(self, other: Self) -> Self {
+        Self {
             x: self.x + other.x,
             y: self.y + other.y,
         }
@@ -70,11 +70,11 @@ impl Challenge for Day2 {
 
 impl Day2 {
     fn run_part_one(&self) -> Result<String, String> {
-        let end_position: Position = self
+        let end_position: Point = self
             .data
             .iter()
-            .map(|l| Position::from_str(l).unwrap())
-            .fold(Position { x: 0, y: 0 }, |acc, item| acc + item);
+            .map(|l| Point::from_str(l).unwrap())
+            .fold(Point { x: 0, y: 0 }, |acc, item| acc + item);
 
         Ok(format!("{:#?}", end_position.x * end_position.y))
     }

@@ -1,37 +1,4 @@
 use crate::utils::challenge::Challenge;
-use std::cmp::Ordering;
-
-struct SlidingWindow<'a> {
-    data: &'a [u32],
-    first: usize,
-    size: usize,
-}
-
-impl<'a> Iterator for SlidingWindow<'a> {
-    type Item = u32;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.first + self.size > self.data.len() {
-            return None;
-        };
-
-        let window = &self.data[self.first..self.first + self.size];
-
-        self.first += 1;
-
-        Some(window.iter().sum())
-    }
-}
-
-impl<'a> SlidingWindow<'a> {
-    fn new(data: &'a [u32], size: usize) -> Self {
-        Self {
-            data,
-            size,
-            first: 0,
-        }
-    }
-}
 
 pub struct Day1 {
     data: Vec<u32>,
@@ -58,45 +25,19 @@ impl Challenge for Day1 {
 }
 
 impl Day1 {
-    fn count_increments<T: Iterator<Item = u32>>(data: T) -> u32 {
-        let mut last: Option<u32> = None;
-
-        let check = |mut acc: u32, item: u32| {
-            acc = match last {
-                Some(x) => match item.cmp(&x) {
-                    Ordering::Greater => {
-                        print!("{} (increased)", item);
-                        acc + 1
-                    }
-                    Ordering::Less => {
-                        print!("{} (decreased)", item);
-                        acc
-                    }
-                    Ordering::Equal => {
-                        print!("{} (no change)", item);
-                        acc
-                    }
-                },
-                None => {
-                    print!("{} (N/A - previous measurement)", item);
-                    0
-                }
-            };
-            last = Some(item);
-            println!(" - {}", acc);
-            acc
-        };
-        data.fold(0, check)
+    fn count_increments(data: &[u32]) -> usize {
+        data.windows(2).filter(|x| x[0] < x[1]).count()
     }
 
     fn run_part_one(&self) -> Result<String, String> {
-        let increased = Self::count_increments(self.data.iter().cloned());
+        let increased = Self::count_increments(&self.data);
         Ok(format!("{:#?}", increased))
     }
 
     fn run_part_two(&self) -> Result<String, String> {
-        let slw = SlidingWindow::new(&self.data, 3);
-        let increased = Self::count_increments(slw);
+        let sums: Vec<u32> = self.data.windows(3).map(|x| x[0] + x[1] + x[2]).collect();
+        let increased = Self::count_increments(&sums);
+
         Ok(format!("{:#?}", increased))
     }
 }

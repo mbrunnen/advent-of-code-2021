@@ -30,7 +30,7 @@ impl Challenge for Day1 {
 }
 
 impl Day1 {
-    fn run_part_one(&self) -> Result<String, String> {
+    fn count_increments<'a, T: Iterator<Item = &'a u32>>(data: T) -> u32 {
         let mut last: Option<u32> = None;
 
         let check = |mut acc: u32, item: &u32| {
@@ -58,9 +58,11 @@ impl Day1 {
             println!(" - {}", acc);
             acc
         };
+        data.fold(0, check)
+    }
 
-        let increased = self.data.iter().fold(0, check);
-
+    fn run_part_one(&self) -> Result<String, String> {
+        let increased = Self::count_increments(self.data.iter());
         Ok(format!("{:#?}", increased))
     }
 }

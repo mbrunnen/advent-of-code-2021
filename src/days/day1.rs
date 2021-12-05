@@ -39,13 +39,8 @@ pub struct Day1 {
 
 impl Challenge for Day1 {
     fn new(input_file: &str) -> Self {
-        let lines: Vec<String> = Self::load(input_file).unwrap();
-
         Self {
-            data: lines
-                .iter()
-                .map(|l| l.parse::<u32>().expect("Could not parse line"))
-                .collect(),
+            data: Self::load(input_file).unwrap(),
         }
     }
 

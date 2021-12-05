@@ -1,4 +1,5 @@
 use crate::utils::challenge::Challenge;
+use std::cmp::Ordering;
 
 pub struct Day1 {
     data: Vec<u32>,
@@ -20,18 +21,20 @@ impl Challenge for Day1 {
 
         let increased = self.data.iter().fold(0, |mut acc, item| {
             acc = match last {
-                Some(x) => {
-                    if item > &x {
+                Some(x) => match item.cmp(&x) {
+                    Ordering::Greater => {
                         print!("{} (increased)", item);
                         acc + 1
-                    } else if item < &x {
+                    }
+                    Ordering::Less => {
                         print!("{} (decreased)", item);
                         acc
-                    } else {
+                    }
+                    Ordering::Equal => {
                         print!("{} (no change)", item);
                         acc
                     }
-                }
+                },
                 None => {
                     print!("{} (N/A - previous measurement)", item);
                     0

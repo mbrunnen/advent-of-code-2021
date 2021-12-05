@@ -1,7 +1,39 @@
 use crate::utils::challenge::Challenge;
+use regex::Regex;
+use std::num::ParseIntError;
+use std::str::FromStr;
 
 pub struct Day2 {
-    data: Vec<u32>,
+    data: Vec<String>,
+}
+
+#[derive(Debug, PartialEq)]
+struct Position {
+    x: i32,
+    y: i32,
+}
+
+impl FromStr for Position {
+    type Err = ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let pat = Regex::new(r"^(\w+)\s(\d+)$").unwrap();
+        let token = pat.captures(s).unwrap();
+
+        let direction = token.get(1).unwrap().as_str();
+        let value = token.get(2).unwrap().as_str().parse::<i32>()?;
+
+        let (x, y) = match direction {
+            "forward" => (value, 0),
+            "down" => (0, value),
+            "up" => (0, -value),
+            _ => {
+                panic!("Unknown direction {}", direction)
+            }
+        };
+
+        Ok(Self { x, y })
+    }
 }
 
 impl Challenge for Day2 {

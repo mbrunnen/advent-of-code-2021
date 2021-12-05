@@ -1,6 +1,7 @@
 use crate::utils::challenge::Challenge;
 use regex::Regex;
 use std::num::ParseIntError;
+use std::ops::Add;
 use std::str::FromStr;
 
 pub struct Day2 {
@@ -36,6 +37,17 @@ impl FromStr for Position {
     }
 }
 
+impl Add for Position {
+    type Output = Position;
+
+    fn add(self, other: Position) -> Position {
+        Position {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
 impl Challenge for Day2 {
     fn new(input_file: &str) -> Self {
         Self {
@@ -58,7 +70,13 @@ impl Challenge for Day2 {
 
 impl Day2 {
     fn run_part_one(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", 0))
+        let end_position: Position = self
+            .data
+            .iter()
+            .map(|l| Position::from_str(l).unwrap())
+            .fold(Position { x: 0, y: 0 }, |acc, item| acc + item);
+
+        Ok(format!("{:#?}", end_position.x * end_position.y))
     }
 
     fn run_part_two(&self) -> Result<String, String> {

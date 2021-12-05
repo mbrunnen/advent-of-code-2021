@@ -6,6 +6,22 @@ use days::*;
 use std::process;
 use utils::challenge::Challenge;
 
+fn parse_arg<T>(arg: Option<&str>) -> Result<T, String>
+where
+    T: std::str::FromStr,
+    <T as std::str::FromStr>::Err: std::fmt::Debug,
+{
+    let arg_str = match arg {
+        Some(x) => x,
+        None => return Err(format!("Problem parsing argument: {:?}", arg)),
+    };
+
+    match arg_str.parse::<T>() {
+        Ok(x) => Ok(x),
+        Err(err) => Err(format!("Problem parsing argument: {:?}", err)),
+    }
+}
+
 fn main() {
     let matches = App::new("Advent of Code 2021")
         .arg(
@@ -13,6 +29,13 @@ fn main() {
                 .help("Sets the day")
                 .required(true)
                 .index(1)
+                .multiple(false),
+        )
+        .arg(
+            Arg::with_name("--part")
+                .short("-p")
+                .help("Set the part")
+                .default_value("1")
                 .multiple(false),
         )
         .arg(
@@ -24,17 +47,10 @@ fn main() {
         )
         .get_matches();
 
-    let day: u32 = matches
-        .value_of("DAY")
-        .unwrap_or_else(|| {
-            eprintln!("Problem parsing DAY: {:#?}", matches);
-            process::exit(1);
-        })
-        .parse::<u32>()
-        .unwrap_or_else(|err| {
-            eprintln!("Problem converting DAY: {:#?}", err);
-            process::exit(1);
-        });
+    let day: u32 = parse_arg(matches.value_of("DAY")).unwrap_or_else(|err| {
+        eprintln!("Problem converting DAY: {:?}", err);
+        process::exit(1);
+    });
 
     let input_file: String = matches
         .values_of("INPUT")

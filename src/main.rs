@@ -65,6 +65,7 @@ fn main() {
 
     let result = match day {
         1 => day1::Day1::new(&input_file).run(part),
+        2 => day2::Day2::new(&input_file).run(part),
         x => unimplemented!("Invalid day: {}", x),
     }
     .unwrap_or_else(|err| {

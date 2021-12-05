@@ -95,7 +95,7 @@ impl Add for SubmarineState {
         Self {
             pos: Point {
                 x: self.pos.x + other.vel,
-                y: self.pos.x + (self.aim * other.vel),
+                y: self.pos.y + (self.aim * other.vel),
             },
             vel: other.vel,
             aim: self.aim + other.aim,

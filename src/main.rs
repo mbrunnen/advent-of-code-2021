@@ -5,7 +5,6 @@ use clap::{App, Arg};
 use days::*;
 use std::process;
 use utils::challenge::Challenge;
-use utils::input::Input;
 
 fn main() {
     let matches = App::new("Advent of Code 2021")
@@ -20,7 +19,8 @@ fn main() {
             Arg::with_name("INPUT")
                 .help("Sets the input")
                 .required(true)
-                .multiple(true),
+                .index(2)
+                .multiple(false),
         )
         .get_matches();
 
@@ -36,20 +36,15 @@ fn main() {
             process::exit(1);
         });
 
-    let input_files: Vec<_> = matches
+    let input_file: String = matches
         .values_of("INPUT")
         .unwrap()
         .map(|s| s.to_string())
         .collect();
 
-    let input = Input::load(&input_files[..]).unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {}", err);
-        process::exit(1);
-    });
-
     let result = match day {
         1 => {
-            let challenge = day1::Day1::new(input.lines);
+            let challenge = day1::Day1::new(&input_file);
             challenge.run()
         }
         x => unimplemented!("Invalid day: {}", x),
@@ -59,5 +54,5 @@ fn main() {
         process::exit(1);
     });
 
-    println!("The result for day {}:\t\n{}", input.day, result);
+    println!("The result for day {}:\t\n{}", day, result);
 }

@@ -33,7 +33,7 @@ impl Day1 {
     fn run_part_one(&self) -> Result<String, String> {
         let mut last: Option<u32> = None;
 
-        let increased = self.data.iter().fold(0, |mut acc, item| {
+        let check = |mut acc: u32, item: &u32| {
             acc = match last {
                 Some(x) => match item.cmp(&x) {
                     Ordering::Greater => {
@@ -57,7 +57,9 @@ impl Day1 {
             last = Some(*item);
             println!(" - {}", acc);
             acc
-        });
+        };
+
+        let increased = self.data.iter().fold(0, check);
 
         Ok(format!("{:#?}", increased))
     }

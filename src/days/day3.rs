@@ -41,7 +41,7 @@ impl Day3 {
     }
 
     fn get_most_common_bit(nums: &[u32], bit: usize) -> bool {
-        2 * Self::count_ones(nums, bit) > nums.len()
+        2 * Self::count_ones(nums, bit) >= nums.len()
     }
 
     fn calculate_gamma(nums: &[u32], bitwidth: usize) -> usize {
@@ -58,6 +58,36 @@ impl Day3 {
         gamma ^ ((1 << bitwidth) - 1)
     }
 
+    fn filter_by_bit(nums: Vec<u32>, bit: usize, filter: bool) -> Vec<u32> {
+        nums.iter()
+            .cloned()
+            .filter(|n| (*n & (1 << bit)) == ((filter as u32) << bit))
+            .collect()
+    }
+
+    fn calculate_oxygen(nums: Vec<u32>, bitwidth: usize) -> Vec<u32> {
+        if nums.len() == 1 || bitwidth == 0 {
+            return nums;
+        }
+
+        let bit = bitwidth - 1;
+        let mcb: bool = Self::get_most_common_bit(&nums, bit);
+        let new_nums = Self::filter_by_bit(nums, bit, mcb);
+
+        Self::calculate_oxygen(new_nums, bitwidth - 1)
+    }
+
+    fn calculate_co2(nums: Vec<u32>, bitwidth: usize) -> Vec<u32> {
+        if nums.len() == 1 || bitwidth == 0 {
+            return nums;
+        }
+        let bit = bitwidth - 1;
+        let lcb: bool = !Self::get_most_common_bit(&nums, bit);
+        let new_nums = Self::filter_by_bit(nums, bit, lcb);
+
+        Self::calculate_co2(new_nums, bitwidth - 1)
+    }
+
     fn run_part_one(&self) -> Result<String, String> {
         let data: Vec<u32> = Self::convert(&self.data);
         let gamma = Self::calculate_gamma(&data, 12);
@@ -67,7 +97,11 @@ impl Day3 {
     }
 
     fn run_part_two(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", 0))
+        let data: Vec<u32> = Self::convert(&self.data);
+        let oxygen = Self::calculate_oxygen(data.clone(), 12)[0];
+        let co2 = Self::calculate_co2(data.clone(), 12)[0];
+
+        Ok(format!("{:#?}", oxygen * co2))
     }
 }
 
@@ -131,5 +165,38 @@ mod tests {
     #[test]
     fn test_calculate_epsilon() {
         assert_eq!(Day3::calculate_epsilon(22, 5), 9);
+    }
+
+    #[test]
+    fn test_get_most_common_bit() {
+        assert!(!Day3::get_most_common_bit(&[0, 0], 0));
+        assert!(Day3::get_most_common_bit(&[0, 1], 0));
+        assert!(Day3::get_most_common_bit(&[1, 1], 0));
+    }
+
+    #[test]
+    fn test_calculate_oxygen() {
+        let input: Vec<u32> = vec![
+            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
+            0b11001, 0b00010, 0b01010,
+        ];
+
+        let expected = 23;
+        let oxygen = Day3::calculate_oxygen(input, 5)[0];
+
+        assert_eq!(oxygen, expected);
+    }
+
+    #[test]
+    fn test_calculate_co2() {
+        let input: Vec<u32> = vec![
+            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
+            0b11001, 0b00010, 0b01010,
+        ];
+
+        let expected = 10;
+        let oxygen = Day3::calculate_co2(input, 5)[0];
+
+        assert_eq!(oxygen, expected);
     }
 }

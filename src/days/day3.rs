@@ -109,6 +109,13 @@ impl Day3 {
 mod tests {
     use super::*;
 
+    fn get_input() -> Vec<u32> {
+        vec![
+            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
+            0b11001, 0b00010, 0b01010,
+        ]
+    }
+
     #[test]
     fn test_to_num() {
         let input: Vec<String> = vec![
@@ -126,10 +133,7 @@ mod tests {
             "01010".to_string(),
         ];
 
-        let expected: Vec<u32> = vec![
-            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
-            0b11001, 0b00010, 0b01010,
-        ];
+        let expected = get_input();
 
         for (pos, l) in input.iter().enumerate() {
             assert_eq!(Day3::to_num(l), expected[pos]);
@@ -138,10 +142,7 @@ mod tests {
 
     #[test]
     fn test_count_ones() {
-        let input: Vec<u32> = vec![
-            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
-            0b11001, 0b00010, 0b01010,
-        ];
+        let input = get_input();
 
         let expected: Vec<usize> = vec![5, 7, 8, 5, 7];
 
@@ -152,10 +153,7 @@ mod tests {
 
     #[test]
     fn test_calculate_gamma() {
-        let input: Vec<u32> = vec![
-            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
-            0b11001, 0b00010, 0b01010,
-        ];
+        let input = get_input();
 
         let expected = 0b10110;
 
@@ -176,10 +174,7 @@ mod tests {
 
     #[test]
     fn test_calculate_oxygen() {
-        let input: Vec<u32> = vec![
-            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
-            0b11001, 0b00010, 0b01010,
-        ];
+        let input = get_input();
 
         let expected = 23;
         let oxygen = Day3::calculate_oxygen(input, 5)[0];
@@ -189,10 +184,7 @@ mod tests {
 
     #[test]
     fn test_calculate_co2() {
-        let input: Vec<u32> = vec![
-            0b00100, 0b11110, 0b10110, 0b10111, 0b10101, 0b01111, 0b00111, 0b11100, 0b10000,
-            0b11001, 0b00010, 0b01010,
-        ];
+        let input = get_input();
 
         let expected = 10;
         let oxygen = Day3::calculate_co2(input, 5)[0];

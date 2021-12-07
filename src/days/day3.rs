@@ -1,5 +1,4 @@
 use crate::utils::challenge::Challenge;
-use std::convert::TryInto;
 
 pub struct Day3 {
     data: Vec<String>,
@@ -41,21 +40,18 @@ impl Day3 {
         d.iter().map(|s| Self::to_num(s)).collect()
     }
 
+    fn get_most_common_bit(nums: &[u32], bit: usize) -> bool {
+        2 * Self::count_ones(nums, bit) > nums.len()
+    }
+
     fn calculate_gamma(nums: &[u32], bitwidth: usize) -> usize {
-        Self::to_num(
-            &(0..bitwidth)
-                .rev()
-                .map(|b| {
-                    if 2 * Self::count_ones(nums, b) > nums.len() {
-                        '1'
-                    } else {
-                        '0'
-                    }
-                })
-                .collect::<String>(),
-        )
-        .try_into()
-        .unwrap()
+        (0..bitwidth).rev().fold(0, |acc, b| {
+            if Self::get_most_common_bit(nums, b) {
+                acc | (1 << b)
+            } else {
+                acc
+            }
+        })
     }
 
     fn calculate_epsilon(gamma: usize, bitwidth: usize) -> usize {

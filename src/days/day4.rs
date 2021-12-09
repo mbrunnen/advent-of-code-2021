@@ -1,4 +1,5 @@
 use crate::utils::challenge::Challenge;
+use std::collections::HashMap;
 
 pub struct Day4 {
     data: Vec<String>,
@@ -6,20 +7,27 @@ pub struct Day4 {
 
 #[derive(Debug, PartialEq)]
 struct BingoBoard {
-    data: Vec<Vec<u32>>,
+    data: HashMap<u32, (usize, usize)>,
+}
+
+impl BingoBoard {
+    fn play(&self, input: &[u32]) {
+        for (i, v) in input.iter().enumerate() {}
+    }
 }
 
 impl From<&[String]> for BingoBoard {
-    fn from(data: &[String]) -> Self {
-        let data: Vec<Vec<u32>> = data
-            .iter()
-            .map(|l| {
+    fn from(input: &[String]) -> Self {
+        let mut data: HashMap<u32, (usize, usize)> = HashMap::new();
+        for (i, l) in input.iter().enumerate() {
+            data.extend(
                 l.split(' ')
                     .filter(|s| !s.is_empty())
-                    .map(|s| s.parse::<u32>().unwrap())
-                    .collect()
-            })
-            .collect();
+                    .enumerate()
+                    .map(|(j, s)| (s.parse::<u32>().unwrap(), (i, j)))
+                    .collect::<HashMap<u32, (usize, usize)>>(),
+            )
+        }
 
         BingoBoard { data }
     }
@@ -45,6 +53,10 @@ impl From<Vec<String>> for BingoSubsystem {
 
         BingoSubsystem { input, boards }
     }
+}
+
+impl BingoSubsystem {
+    fn run(&self) {}
 }
 
 impl Challenge for Day4 {
@@ -106,59 +118,52 @@ mod tests {
 
     #[test]
     fn test_bingo_board_from() {
-        let expected = BingoBoard {
-            data: vec![
-                vec![22, 13, 17, 11, 0],
-                vec![8, 2, 23, 4, 24],
-                vec![21, 9, 14, 16, 7],
-                vec![6, 10, 3, 18, 5],
-                vec![1, 12, 20, 15, 19],
-            ],
-        };
+        let expected: HashMap<u32, (usize, usize)> = HashMap::from([
+            (3, (3, 2)),
+            (17, (0, 2)),
+            (11, (0, 3)),
+            (8, (1, 0)),
+            (24, (1, 4)),
+            (0, (0, 4)),
+            (4, (1, 3)),
+            (9, (2, 1)),
+            (15, (4, 3)),
+            (20, (4, 2)),
+            (21, (2, 0)),
+            (12, (4, 1)),
+            (16, (2, 3)),
+            (22, (0, 0)),
+            (10, (3, 1)),
+            (6, (3, 0)),
+            (23, (1, 2)),
+            (14, (2, 2)),
+            (2, (1, 1)),
+            (19, (4, 4)),
+            (1, (4, 0)),
+            (13, (0, 1)),
+            (7, (2, 4)),
+            (18, (3, 3)),
+            (5, (3, 4)),
+        ]);
 
-        assert_eq!(BingoBoard::from(&get_input()[2..7]), expected);
+        let bingo = BingoBoard::from(&get_input()[2..7]);
+        assert_eq!(bingo.data, expected);
     }
 
     #[test]
     fn test_bingo_subsystem_from() {
-        let expected = BingoSubsystem {
-            input: vec![
-                7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24, 10, 16, 13, 6, 15, 25, 12, 22, 18, 20, 8,
-                19, 3, 26, 1,
-            ],
-            boards: vec![
-                BingoBoard {
-                    data: vec![
-                        vec![22, 13, 17, 11, 0],
-                        vec![8, 2, 23, 4, 24],
-                        vec![21, 9, 14, 16, 7],
-                        vec![6, 10, 3, 18, 5],
-                        vec![1, 12, 20, 15, 19],
-                    ],
-                },
-                BingoBoard {
-                    data: vec![
-                        vec![3, 15, 0, 2, 22],
-                        vec![9, 18, 13, 17, 5],
-                        vec![19, 8, 7, 25, 23],
-                        vec![20, 11, 10, 24, 4],
-                        vec![14, 21, 16, 12, 6],
-                    ],
-                },
-                BingoBoard {
-                    data: vec![
-                        vec![14, 21, 17, 24, 4],
-                        vec![10, 16, 15, 9, 19],
-                        vec![18, 8, 23, 26, 20],
-                        vec![22, 11, 13, 6, 5],
-                        vec![2, 0, 12, 3, 7],
-                    ],
-                },
-            ],
-        };
-
+        let expected_input = vec![
+            7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24, 10, 16, 13, 6, 15, 25, 12, 22, 18, 20, 8, 19,
+            3, 26, 1,
+        ];
+        let expected_boards: Vec<BingoBoard> = vec![
+            BingoBoard::from(&get_input()[2..7]),
+            BingoBoard::from(&get_input()[8..13]),
+            BingoBoard::from(&get_input()[14..19]),
+        ];
         let bingo = BingoSubsystem::from(get_input());
-        println!("{:#?}", bingo);
-        assert_eq!(bingo, expected);
+
+        assert_eq!(bingo.input, expected_input);
+        assert_eq!(bingo.boards, expected_boards);
     }
 }

@@ -28,9 +28,6 @@ impl BingoBoard {
         for (i, v) in input.iter().enumerate() {
             if self.data.contains_key(v) && self.check(v) {
                 let sum_unmarked: u32 = self.data.iter().map(|(key, _)| *key).sum();
-                println!("Board has won after {} turn ", i);
-                println!("Board has won after calling {}", v);
-                println!("Sum of unmarked numbers is {}", sum_unmarked);
                 return Some((i, *v, sum_unmarked));
             }
         }
@@ -83,7 +80,7 @@ impl From<&[String]> for BingoSubsystem {
 }
 
 impl BingoSubsystem {
-    fn play(mut self) -> usize {
+    fn play(mut self) -> (u32, u32) {
         let handles: Vec<_> = (0..self.boards.len())
             .map(|_| {
                 let mut board = self.boards.pop().unwrap();
@@ -94,17 +91,25 @@ impl BingoSubsystem {
             .collect();
 
         let mut winner = self.input.len();
-        let mut result = 0;
+        let mut loser = 0;
+
+        let mut winner_result = 0;
+        let mut loser_result = 0;
+
         for h in handles {
             if let Some((idx, last, sum_unmarked)) = h.join().unwrap() {
                 if idx < winner {
                     winner = idx;
-                    result = last * sum_unmarked;
+                    winner_result = last * sum_unmarked;
+                }
+                if idx > loser {
+                    loser = idx;
+                    loser_result = last * sum_unmarked;
                 }
             }
         }
 
-        result as usize
+        (winner_result, loser_result)
     }
 }
 
@@ -131,12 +136,14 @@ impl Challenge for Day4 {
 impl Day4 {
     fn run_part_one(&self) -> Result<String, String> {
         let bingo = BingoSubsystem::from(&self.data[..]);
-        let result = bingo.play();
+        let (result, _) = bingo.play();
         Ok(format!("{:#?}", result))
     }
 
     fn run_part_two(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", 0))
+        let bingo = BingoSubsystem::from(&self.data[..]);
+        let (_, result) = bingo.play();
+        Ok(format!("{:#?}", result))
     }
 }
 
@@ -221,7 +228,8 @@ mod tests {
     #[test]
     fn test_bingo_subsystem_play() {
         let bingo = BingoSubsystem::from(&get_input()[..]);
-        let result = bingo.play();
-        assert_eq!(result, 4512);
+        let (win, lose) = bingo.play();
+        assert_eq!(win, 4512);
+        assert_eq!(lose, 1924);
     }
 }

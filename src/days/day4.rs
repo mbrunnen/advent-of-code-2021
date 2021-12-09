@@ -1,5 +1,6 @@
 use crate::utils::challenge::Challenge;
 use std::collections::HashMap;
+use std::thread;
 
 pub struct Day4 {
     data: Vec<String>,
@@ -8,11 +9,33 @@ pub struct Day4 {
 #[derive(Debug, PartialEq)]
 struct BingoBoard {
     data: HashMap<u32, (usize, usize)>,
+    row_cnt: Vec<u32>,
+    col_cnt: Vec<u32>,
 }
 
 impl BingoBoard {
-    fn play(&self, input: &[u32]) {
-        for (i, v) in input.iter().enumerate() {}
+    fn check(&mut self, num: &u32) -> bool {
+        if self.data.contains_key(num) {
+            let (row, col) = self.data.remove(num).unwrap();
+            self.row_cnt[row] += 1;
+            self.col_cnt[col] += 1;
+        }
+
+        self.row_cnt.iter().any(|&x| x > 4) || self.col_cnt.iter().any(|&x| x > 4)
+    }
+
+    fn play(&mut self, input: &[u32]) -> Option<(usize, u32, u32)> {
+        for (i, v) in input.iter().enumerate() {
+            if self.data.contains_key(v) && self.check(v) {
+                let sum_unmarked: u32 = self.data.iter().map(|(key, _)| *key).sum();
+                println!("Board has won after {} turn ", i);
+                println!("Board has won after calling {}", v);
+                println!("Sum of unmarked numbers is {}", sum_unmarked);
+                return Some((i, *v, sum_unmarked));
+            }
+        }
+
+        None
     }
 }
 
@@ -29,7 +52,11 @@ impl From<&[String]> for BingoBoard {
             )
         }
 
-        BingoBoard { data }
+        BingoBoard {
+            data,
+            row_cnt: vec![0, 0, 0, 0, 0],
+            col_cnt: vec![0, 0, 0, 0, 0],
+        }
     }
 }
 
@@ -39,8 +66,8 @@ struct BingoSubsystem {
     boards: Vec<BingoBoard>,
 }
 
-impl From<Vec<String>> for BingoSubsystem {
-    fn from(data: Vec<String>) -> Self {
+impl From<&[String]> for BingoSubsystem {
+    fn from(data: &[String]) -> Self {
         let input: Vec<u32> = data[0]
             .split(',')
             .map(|s| s.parse::<u32>().unwrap())
@@ -56,7 +83,29 @@ impl From<Vec<String>> for BingoSubsystem {
 }
 
 impl BingoSubsystem {
-    fn run(&self) {}
+    fn play(mut self) -> usize {
+        let handles: Vec<_> = (0..self.boards.len())
+            .map(|_| {
+                let mut board = self.boards.pop().unwrap();
+                let input = self.input.clone();
+
+                thread::spawn(move || board.play(&input))
+            })
+            .collect();
+
+        let mut winner = self.input.len();
+        let mut result = 0;
+        for h in handles {
+            if let Some((idx, last, sum_unmarked)) = h.join().unwrap() {
+                if idx < winner {
+                    winner = idx;
+                    result = last * sum_unmarked;
+                }
+            }
+        }
+
+        result as usize
+    }
 }
 
 impl Challenge for Day4 {
@@ -81,7 +130,9 @@ impl Challenge for Day4 {
 
 impl Day4 {
     fn run_part_one(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", 0))
+        let bingo = BingoSubsystem::from(&self.data[..]);
+        let result = bingo.play();
+        Ok(format!("{:#?}", result))
     }
 
     fn run_part_two(&self) -> Result<String, String> {
@@ -161,9 +212,16 @@ mod tests {
             BingoBoard::from(&get_input()[8..13]),
             BingoBoard::from(&get_input()[14..19]),
         ];
-        let bingo = BingoSubsystem::from(get_input());
+        let bingo = BingoSubsystem::from(&get_input()[..]);
 
         assert_eq!(bingo.input, expected_input);
         assert_eq!(bingo.boards, expected_boards);
+    }
+
+    #[test]
+    fn test_bingo_subsystem_play() {
+        let bingo = BingoSubsystem::from(&get_input()[..]);
+        let result = bingo.play();
+        assert_eq!(result, 4512);
     }
 }

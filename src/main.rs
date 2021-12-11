@@ -70,6 +70,7 @@ fn main() {
         4 => day4::Day4::new(&input_file).run(part),
         5 => day5::Day5::new(&input_file).run(part),
         6 => day6::Day6::new(&input_file).run(part),
+        7 => day7::Day7::new(&input_file).run(part),
         x => unimplemented!("Invalid day: {}", x),
     }
     .unwrap_or_else(|err| {

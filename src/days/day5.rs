@@ -4,42 +4,30 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 struct OceanFloor {
-    data: HashMap<(u32, u32), u32>,
+    vents: HashMap<(i32, i32), u32>,
 }
 
 impl OceanFloor {
     fn new() -> Self {
         Self {
-            data: HashMap::new(),
+            vents: HashMap::new(),
         }
     }
 
-    fn add_line(&mut self, start: (u32, u32), end: (u32, u32)) {
-        if start.0 == end.0 {
-            let x = start.0;
-            let yrange = if start.1 > end.1 {
-                end.1..=start.1
-            } else {
-                start.1..=end.1
-            };
-            for y in yrange {
-                *self.data.entry((x, y)).or_insert(0) += 1;
-            }
-        } else if start.1 == end.1 {
-            let y = start.1;
-            let xrange = if start.0 > end.0 {
-                end.0..=start.0
-            } else {
-                start.0..=end.0
-            };
-            for x in xrange {
-                *self.data.entry((x, y)).or_insert(0) += 1;
-            }
+    fn add_vent(&mut self, start: (i32, i32), end: (i32, i32)) {
+        let steps = i32::max(i32::abs(start.0 - end.0), i32::abs(start.1 - end.1));
+        let dx = i32::signum(end.0 - start.0);
+        let dy = i32::signum(end.1 - start.1);
+        for i in 0..=steps {
+            *self
+                .vents
+                .entry((start.0 + i * dx, start.1 + i * dy))
+                .or_insert(0) += 1;
         }
     }
 
-    fn count_ovelaps(&self) -> usize {
-        self.data.values().filter(|&v| *v > 1).count()
+    fn count_overlaps(&self) -> usize {
+        self.vents.values().filter(|&v| *v > 1).count()
     }
 }
 
@@ -50,11 +38,11 @@ impl From<&[String]> for OceanFloor {
 
         for l in input {
             let tokens = pat.captures(l).unwrap();
-            let x1 = tokens.get(1).unwrap().as_str().parse::<u32>().unwrap();
-            let y1 = tokens.get(2).unwrap().as_str().parse::<u32>().unwrap();
-            let x2 = tokens.get(3).unwrap().as_str().parse::<u32>().unwrap();
-            let y2 = tokens.get(4).unwrap().as_str().parse::<u32>().unwrap();
-            floor.add_line((x1, y1), (x2, y2));
+            let x1 = tokens.get(1).unwrap().as_str().parse::<i32>().unwrap();
+            let y1 = tokens.get(2).unwrap().as_str().parse::<i32>().unwrap();
+            let x2 = tokens.get(3).unwrap().as_str().parse::<i32>().unwrap();
+            let y2 = tokens.get(4).unwrap().as_str().parse::<i32>().unwrap();
+            floor.add_vent((x1, y1), (x2, y2));
         }
 
         floor
@@ -74,7 +62,6 @@ impl Challenge for Day5 {
 
     fn run(&self, part: u32) -> Result<String, String> {
         match part {
-            1 => self.run_part_one(),
             2 => self.run_part_two(),
             x => unimplemented!(
                 "Invalid part {} for Day {}",
@@ -86,13 +73,9 @@ impl Challenge for Day5 {
 }
 
 impl Day5 {
-    fn run_part_one(&self) -> Result<String, String> {
-        let floor = OceanFloor::from(&self.data[..]);
-        Ok(format!("{:#?}", floor.count_ovelaps()))
-    }
-
     fn run_part_two(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", 0))
+        let floor = OceanFloor::from(&self.data[..]);
+        Ok(format!("{:#?}", floor.count_overlaps()))
     }
 }
 
@@ -103,7 +86,7 @@ mod tests {
     #[test]
     fn test_add_line() {
         let expected = OceanFloor {
-            data: HashMap::from([
+            vents: HashMap::from([
                 ((0, 9), 2),
                 ((1, 9), 2),
                 ((2, 9), 2),
@@ -121,9 +104,9 @@ mod tests {
         };
 
         let mut floor = OceanFloor::new();
-        floor.add_line((0, 9), (5, 9));
-        floor.add_line((0, 9), (2, 9));
-        floor.add_line((9, 4), (3, 4));
+        floor.add_vent((0, 9), (5, 9));
+        floor.add_vent((0, 9), (2, 9));
+        floor.add_vent((9, 4), (3, 4));
         assert_eq!(expected, floor)
     }
 
@@ -131,19 +114,15 @@ mod tests {
     fn test_from() {
         let input: Vec<String> = vec![
             "0,9 -> 5,9".to_string(),
-            "8,0 -> 0,8".to_string(),
             "9,4 -> 3,4".to_string(),
             "2,2 -> 2,1".to_string(),
             "7,0 -> 7,4".to_string(),
-            "6,4 -> 2,0".to_string(),
             "0,9 -> 2,9".to_string(),
             "3,4 -> 1,4".to_string(),
-            "0,0 -> 8,8".to_string(),
-            "5,5 -> 8,2".to_string(),
         ];
 
         let expected = OceanFloor {
-            data: HashMap::from([
+            vents: HashMap::from([
                 ((1, 4), 1),
                 ((1, 9), 2),
                 ((5, 9), 1),
@@ -169,25 +148,60 @@ mod tests {
         };
 
         let floor = OceanFloor::from(&input[..]);
-        assert_eq!(expected, floor);
+        assert_eq!(expected.vents, floor.vents);
     }
 
     #[test]
-    fn test_count_overlaps() {
+    fn test_count_straight_overlaps() {
         let input: Vec<String> = vec![
-            "0,9 -> 5,9".to_string(),
-            "8,0 -> 0,8".to_string(),
-            "9,4 -> 3,4".to_string(),
-            "2,2 -> 2,1".to_string(),
-            "7,0 -> 7,4".to_string(),
-            "6,4 -> 2,0".to_string(),
-            "0,9 -> 2,9".to_string(),
-            "3,4 -> 1,4".to_string(),
-            "0,0 -> 8,8".to_string(),
-            "5,5 -> 8,2".to_string(),
+            String::from("0,9 -> 5,9"),
+            String::from("8,0 -> 0,8"),
+            String::from("9,4 -> 3,4"),
+            String::from("2,2 -> 2,1"),
+            String::from("7,0 -> 7,4"),
+            String::from("6,4 -> 2,0"),
+            String::from("0,9 -> 2,9"),
+            String::from("3,4 -> 1,4"),
+            String::from("0,0 -> 8,8"),
+            String::from("5,5 -> 8,2"),
         ];
 
         let floor = OceanFloor::from(&input[..]);
-        assert_eq!(5, floor.count_ovelaps());
+        assert_eq!(12, floor.count_overlaps());
+    }
+
+    #[test]
+    fn test_add_diagonal() {
+        let expected = OceanFloor {
+            vents: HashMap::from([
+                ((0, 0), 1),
+                ((0, 8), 1),
+                ((1, 1), 1),
+                ((1, 7), 1),
+                ((2, 0), 1),
+                ((2, 2), 1),
+                ((2, 6), 1),
+                ((3, 1), 1),
+                ((3, 3), 1),
+                ((3, 5), 1),
+                ((4, 2), 1),
+                ((4, 4), 2),
+                ((5, 3), 2),
+                ((5, 5), 1),
+                ((6, 2), 1),
+                ((6, 4), 1),
+                ((6, 6), 1),
+                ((7, 1), 1),
+                ((7, 7), 1),
+                ((8, 0), 1),
+                ((8, 8), 1),
+            ]),
+        };
+
+        let mut floor = OceanFloor::new();
+        floor.add_vent((8, 0), (0, 8));
+        floor.add_vent((6, 4), (2, 0));
+        floor.add_vent((0, 0), (8, 8));
+        assert_eq!(expected, floor)
     }
 }

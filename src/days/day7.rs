@@ -34,6 +34,17 @@ impl CrabMap {
             .sum::<isize>()
     }
 
+    fn gauss_align_to(&self, pos: isize) -> isize {
+        self.positions
+            .iter()
+            .map(|(p, c)| {
+                let dist = isize::abs(pos - p);
+                let fuel = dist * (dist + 1) / 2;
+                fuel * *c as isize
+            })
+            .sum::<isize>()
+    }
+
     fn max_position(&self) -> isize {
         *self.positions.keys().max().unwrap()
     }
@@ -45,6 +56,13 @@ impl CrabMap {
     fn optimise(&self) -> isize {
         (self.min_position()..=self.max_position())
             .map(|pos| self.align_to(pos))
+            .min()
+            .unwrap()
+    }
+
+    fn gauss_optimise(&self) -> isize {
+        (self.min_position()..=self.max_position())
+            .map(|pos| self.gauss_align_to(pos))
             .min()
             .unwrap()
     }
@@ -77,7 +95,8 @@ impl Day7 {
     }
 
     fn run_part_two(&self) -> Result<String, String> {
-        Ok(format!("{:#?}", 0))
+        let crabs = CrabMap::from(&self.data[0][..]);
+        Ok(format!("{:#?}", crabs.gauss_optimise()))
     }
 }
 
@@ -115,5 +134,11 @@ mod tests {
     fn test_optimise() {
         let crabs = CrabMap::from("16,1,2,0,4,2,7,1,2,14");
         assert_eq!(37, crabs.optimise());
+    }
+
+    #[test]
+    fn test_gauss_optimise() {
+        let crabs = CrabMap::from("16,1,2,0,4,2,7,1,2,14");
+        assert_eq!(168, crabs.gauss_optimise());
     }
 }

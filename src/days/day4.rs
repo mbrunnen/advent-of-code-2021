@@ -113,7 +113,7 @@ impl BingoSubsystem {
     }
 }
 
-impl Challenge for Day4 {
+impl Challenge <String>for Day4 {
     fn new(input_file: &str) -> Self {
         Self {
             data: Self::load(input_file).unwrap(),

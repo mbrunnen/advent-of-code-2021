@@ -103,7 +103,7 @@ impl Add for SubmarineState {
     }
 }
 
-impl Challenge for Day2 {
+impl Challenge <String>for Day2 {
     fn new(input_file: &str) -> Self {
         Self {
             data: Self::load(input_file).unwrap(),

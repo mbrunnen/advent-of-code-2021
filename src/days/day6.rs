@@ -49,7 +49,7 @@ pub struct Day6 {
     data: Vec<String>,
 }
 
-impl Challenge for Day6 {
+impl Challenge <String>for Day6 {
     fn new(input_file: &str) -> Self {
         Self {
             data: Self::load(input_file).unwrap(),

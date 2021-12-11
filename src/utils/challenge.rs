@@ -1,10 +1,10 @@
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
-pub trait Challenge {
+pub trait Challenge<T> {
     fn new(input_file: &str) -> Self;
     fn run(&self, part: u32) -> Result<String, String>;
-    fn load<T>(input_file: &str) -> Result<Vec<T>, String>
+    fn load(input_file: &str) -> Result<Vec<T>, String>
     where
         T: std::str::FromStr,
         <T as std::str::FromStr>::Err: std::fmt::Debug,
@@ -14,8 +14,11 @@ pub trait Challenge {
                 let buf = BufReader::new(file);
                 Ok(buf
                     .lines()
-                    .map(|l| l.expect("Could not parse line"))
-                    .map(|l| l.parse::<T>().expect("Could not parse line"))
+                    .map(|l| {
+                        l.expect("Could not parse line")
+                            .parse::<T>()
+                            .expect("Could not parse line")
+                    })
                     .collect())
             }
             Err(e) => Err(format!("Error while reading the file: {}", e)),
